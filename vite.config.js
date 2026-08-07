@@ -19,14 +19,10 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            src: 'radar_icon.png',
+            sizes: '192x192 512x512 1024x1024 any',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
