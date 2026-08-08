@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,13 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
   const [showFullProfile, setShowFullProfile] = useState(false);
   const [liked, setLiked] = useState(false);
   const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (echo) {
+      setLiked(false);
+      setShowFullProfile(false);
+    }
+  }, [echo?.id]);
 
   if (!echo) return null;
 
