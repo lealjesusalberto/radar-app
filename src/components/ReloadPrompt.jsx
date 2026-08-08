@@ -19,57 +19,56 @@ function ReloadPrompt() {
   return (
     <div style={{
       position: 'fixed',
-      bottom: '100px', // Just above bottom nav
-      left: '20px',
-      right: '20px',
-      backgroundColor: 'rgba(0, 255, 204, 0.1)',
-      border: '1px solid var(--radar-color)',
-      color: '#fff',
-      padding: '16px',
-      borderRadius: '16px',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-      backdropFilter: 'blur(15px)',
-      WebkitBackdropFilter: 'blur(15px)',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      zIndex: 99999,
       display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-      zIndex: 9999,
-      alignItems: 'center',
-      textAlign: 'center'
+      justifyContent: 'center',
+      alignItems: 'center'
     }}>
-      <div style={{ fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span>🚀</span> ¡Hay una nueva versión de Orbit disponible!
-      </div>
-      <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+      <div style={{
+        backgroundColor: 'rgba(0, 255, 204, 0.1)',
+        border: '1px solid var(--radar-color)',
+        color: '#fff',
+        padding: '30px 20px',
+        borderRadius: '24px',
+        boxShadow: '0 20px 40px rgba(0,255,204,0.15)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        alignItems: 'center',
+        textAlign: 'center',
+        width: '85%',
+        maxWidth: '350px'
+      }}>
+        <div style={{ fontSize: '40px' }}>🚀</div>
+        <div style={{ fontSize: '18px', fontWeight: 'bold' }}>
+          ¡Actualización disponible!
+        </div>
+        <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '10px' }}>
+          Hemos lanzado una nueva versión de Orbit con mejoras importantes.
+        </div>
         <button 
           onClick={() => updateServiceWorker(true)}
           style={{
-            flex: 1,
+            width: '100%',
             backgroundColor: 'var(--radar-color)',
             color: '#000',
             border: 'none',
-            padding: '10px',
+            padding: '14px',
             borderRadius: '12px',
             fontWeight: 'bold',
-            cursor: 'pointer'
+            fontSize: '16px',
+            cursor: 'pointer',
+            boxShadow: '0 0 15px var(--radar-color-glow)'
           }}
         >
           Actualizar ahora
-        </button>
-        <button 
-          onClick={() => setNeedRefresh(false)}
-          style={{
-            flex: 1,
-            backgroundColor: 'transparent',
-            color: 'var(--text-muted)',
-            border: '1px solid var(--glass-border)',
-            padding: '10px',
-            borderRadius: '12px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          Más tarde
         </button>
       </div>
     </div>
