@@ -65,9 +65,18 @@ function App() {
         if (radiusPct > 45) radiusPct = 45; // Cap at edge
         if (radiusPct < 5) radiusPct = 5;   // Don't spawn exactly in center
 
-        const angle = Math.random() * Math.PI * 2; 
+        // Use deterministic angle based on relative GPS coordinates instead of Math.random()
+        // This keeps the user dot stable on the radar even if GPS fluctuates by a few meters
+        let angle = 0;
+        if (userData?.location?.lat && data.location?.lat) {
+           angle = Math.atan2(
+             data.location.lat - userData.location.lat,
+             data.location.lng - userData.location.lng
+           );
+        }
+
         const x = 50 + radiusPct * Math.cos(angle);
-        const y = 50 + radiusPct * Math.sin(angle);
+        const y = 50 + radiusPct * Math.sin(angle); // Invert Y if you want North to be up, but standard math is fine for stability
 
         realEchoes.push({
           id: doc.id,
