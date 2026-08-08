@@ -114,12 +114,14 @@ function App() {
     setSelectedEcho(null);
     setPublicProfileUser(null);
     // Para manejar tanto si viene desde el modal (echo) o desde la vista de perfil publico (user)
-    const userToChat = echoOrUser.user ? echoOrUser.user : echoOrUser;
+    const userToChat = echoOrUser?.user ? echoOrUser.user : echoOrUser;
     
-    setActiveChat(userToChat);
+    if (userToChat) {
+      setActiveChat(userToChat);
+    }
     
     setEchoes(prev => prev.map(e => {
-      if (e.user.name === userToChat.name) {
+      if (e?.user?.name && userToChat?.name && e.user.name === userToChat.name) {
         return { ...e, distance: 0, x: 50, y: 50 };
       }
       return e;

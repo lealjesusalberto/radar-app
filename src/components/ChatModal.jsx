@@ -71,8 +71,8 @@ export default function ChatModal({ user, onClose }) {
 
   return (
     <div style={{
-      position: 'absolute', bottom: '85px', right: '2vmin', zIndex: 200,
-      width: '90vw', maxWidth: '320px', height: '400px', backgroundColor: 'var(--echo-bg)',
+      position: 'absolute', bottom: '85px', right: '50%', transform: 'translateX(50%)', zIndex: 2000,
+      width: '90vw', maxWidth: '400px', height: '60vh', minHeight: '350px', backgroundColor: 'var(--echo-bg)',
       borderRadius: '16px', border: '1px solid var(--glass-border)',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
       boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
