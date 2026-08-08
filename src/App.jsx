@@ -10,6 +10,7 @@ import AuthView from './components/AuthView';
 import ChatModal from './components/ChatModal';
 import ChatsView from './components/ChatsView';
 import NotificationsModal from './components/NotificationsModal';
+import ReloadPrompt from './components/ReloadPrompt';
 import { useAuth } from './context/AuthContext';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -232,6 +233,9 @@ function App() {
 
       {/* Menú de Navegación Inferior */}
       <BottomNav activeTab={activeTab} onChangeTab={setActiveTab} />
+      
+      {/* PWA Update Prompt */}
+      <ReloadPrompt />
     </div>
   );
 }
