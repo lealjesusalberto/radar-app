@@ -110,7 +110,7 @@ const AuthView = ({ onLogin }) => {
             WebkitTextFillColor: 'transparent',
             textShadow: '0 2px 10px rgba(0, 255, 204, 0.2)'
           }}>
-            RADAR
+            ORBIT
           </h1>
           <p style={{ color: 'var(--text-muted)', marginTop: '12px', fontSize: '15px', fontWeight: '500' }}>
             {isLogin ? 'Bienvenido de nuevo a la red' : 'Comienza a conectar hoy'}

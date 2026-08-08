@@ -209,7 +209,7 @@ const ProfileView = () => {
                 style={{background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '4px 8px', borderRadius: '4px', marginTop: '4px'}} 
               />
             ) : (
-              <p style={styles.subtitle}>{user.job || 'Usuario de Radar'}</p>
+              <p style={styles.subtitle}>{user.job || 'Usuario de Orbit'}</p>
             )}
             <p style={styles.location}>📍 {user.location?.lat ? 'En el Radar' : 'Buscando ubicación...'}</p>
           </div>

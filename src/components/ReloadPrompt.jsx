@@ -38,7 +38,7 @@ function ReloadPrompt() {
       textAlign: 'center'
     }}>
       <div style={{ fontSize: '15px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span>🚀</span> ¡Hay una nueva versión de Radar disponible!
+        <span>🚀</span> ¡Hay una nueva versión de Orbit disponible!
       </div>
       <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
         <button 

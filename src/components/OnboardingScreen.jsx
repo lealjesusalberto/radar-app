@@ -7,16 +7,8 @@ const OnboardingScreen = ({ onEnter }) => {
       <img src="/onboarding_cover.png" alt="Onboarding Cover" style={styles.backgroundImage} />
       <div style={styles.overlay}></div>
       
-      <div style={styles.content}>
+      <div style={styles.topSection}>
         <div style={styles.logoContainer}>
-          <h1 style={styles.logoText}>RADAR<span style={styles.logoAccent}>APP</span></h1>
-          <p style={styles.tagline}>Encuentra tu sintonía</p>
-        </div>
-
-        <div style={styles.bottomSection}>
-          <h2 style={styles.title}>Conecta de forma real, en tiempo real.</h2>
-          <p style={styles.description}>
-            Lanza ecos en el mapa, mira quién está cerca de ti y acerca a los chicos que más te interesen a tu órbita.
           </p>
           <button style={styles.enterButton} onClick={onEnter}>
             Comenzar a explorar ➔

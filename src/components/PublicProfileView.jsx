@@ -21,13 +21,11 @@ const PublicProfileView = ({ user, onClose, onChat }) => {
             {/* Espacio para alinear el backButton si quisieramos, pero lo dejamos absoluto arriba */}
           </div>
           <div style={styles.headerBottom}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h1 style={styles.name}>{user.name}, {user.age}</h1>
-              {user.isPro && <span style={styles.proBadge}>PRO</span>}
-            </div>
-            <p style={styles.subtitle}>{user.job || 'Usuario de Radar'}</p>
-            <p style={styles.location}>📍 A {user.distance || '0'}m de ti</p>
+            <h1 style={styles.name}>{user.name} {user.age ? `, ${user.age}` : ''}</h1>
+            {user.isPro && <span style={styles.proBadge}>PRO</span>}
           </div>
+          <p style={styles.subtitle}>{user.job || 'Usuario de Orbit'}</p>
+          <p style={styles.location}>📍 {user.distance ? `A ${user.distance}m de ti` : 'En el Radar'}</p>
         </div>
       </div>
 

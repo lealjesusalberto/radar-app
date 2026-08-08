@@ -91,7 +91,7 @@ function App() {
 
         realEchoes.push({
           id: doc.id,
-          message: data.bio ? data.bio.substring(0, 40) + '...' : '¡Hola, estoy en Radar!',
+          message: data.bio ? data.bio.substring(0, 40) + '...' : '¡Hola, estoy en Orbit!',
           distance: Math.round(distance),
           x, y,
           user: {
@@ -161,7 +161,7 @@ function App() {
       {/* Título flotante UI */}
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
         <h1 style={{ margin: 0, fontSize: '6vmin', fontWeight: '900', letterSpacing: '1px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-          RADAR <span style={{ color: 'var(--radar-color)' }}>APP</span>
+          ORBIT
         </h1>
       </div>
 

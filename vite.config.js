@@ -11,8 +11,8 @@ export default defineConfig({
         enabled: true
       },
       manifest: {
-        name: 'Radar App',
-        short_name: 'Radar',
+        name: 'Orbit',
+        short_name: 'Orbit',
         description: 'Encuentra personas cerca de ti',
         theme_color: '#0f172a',
         background_color: '#0f172a',

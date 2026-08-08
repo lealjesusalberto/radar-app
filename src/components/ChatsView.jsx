@@ -54,7 +54,7 @@ export default function ChatsView({ onOpenChat }) {
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
         {chats.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '40px' }}>No tienes chats activos. ¡Ve al Radar y saluda a alguien!</p>
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '40px' }}>No tienes chats activos. ¡Ve a explorar y saluda a alguien!</p>
         ) : (
           chats.map(chat => (
             <div 
