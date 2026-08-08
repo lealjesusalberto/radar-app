@@ -30,7 +30,7 @@ const AuthView = ({ onLogin }) => {
           interests: [],
           isPro: false,
           job: '',
-          photo: 'https://i.pravatar.cc/150', // Default photo
+          photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8BFF&color=fff`,
           gallery: []
         });
       }

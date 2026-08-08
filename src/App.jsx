@@ -7,6 +7,8 @@ import ProfileView from './components/ProfileView';
 import PublicProfileView from './components/PublicProfileView';
 import OnboardingScreen from './components/OnboardingScreen';
 import AuthView from './components/AuthView';
+import ChatModal from './components/ChatModal';
+import ChatsView from './components/ChatsView';
 import { useAuth } from './context/AuthContext';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -161,28 +163,9 @@ function App() {
         </RadarBackground>
       )}
 
+      {/* Pestaña de Chats */}
       {activeTab === 'chats' && (
-        <div style={{ padding: '80px 20px', width: '100%', height: '100%', backgroundColor: 'var(--bg-color)', color: 'white' }}>
-          <h2>Tus Chats Activos</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Tus conexiones recientes aparecerán aquí.</p>
-          {/* Mock Lista de Chats */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'var(--echo-bg)', borderRadius: '12px' }}>
-              <img src="https://i.pravatar.cc/150?img=1" alt="Ana" style={{ width: '50px', height: '50px', borderRadius: '50%', border: '2px solid var(--radar-color)' }} />
-              <div>
-                <h4 style={{ margin: '0 0 4px 0' }}>Ana</h4>
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>¡Claro! Nos vemos a las 5.</p>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'var(--echo-bg)', borderRadius: '12px' }}>
-              <img src="https://i.pravatar.cc/150?img=12" alt="Miguel" style={{ width: '50px', height: '50px', borderRadius: '50%', border: '2px solid transparent' }} />
-              <div>
-                <h4 style={{ margin: '0 0 4px 0' }}>Miguel</h4>
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>Te espero en la cancha.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ChatsView onOpenChat={handleChat} />
       )}
 
       {activeTab === 'perfil' && <ProfileView />}
@@ -204,45 +187,9 @@ function App() {
         />
       )}
 
-      {/* Mockup Chat Móvil Responsivo */}
+      {/* Chat en tiempo real */}
       {activeChat && activeTab === 'radar' && (
-        <div style={{
-          position: 'absolute', bottom: '85px', right: '2vmin', zIndex: 200,
-          width: '90vw', maxWidth: '320px', backgroundColor: 'var(--echo-bg)',
-          borderRadius: '16px', border: '1px solid var(--glass-border)',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.8)'
-        }}>
-          <div style={{
-            padding: '12px', backgroundColor: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255,255,255,0.1)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src={activeChat.photo} alt={activeChat.name} style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
-              <span style={{ fontWeight: 'bold', fontSize: '14px' }}>{activeChat.name}</span>
-            </div>
-            <button 
-              onClick={() => setActiveChat(null)} 
-              style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '18px', padding: '0 4px' }}
-            >
-              ✕
-            </button>
-          </div>
-          <div style={{ padding: '60px 16px 12px 16px', fontSize: '13px', color: 'var(--text-muted)' }}>
-            Empieza a chatear con {activeChat.name}...
-          </div>
-          <div style={{ padding: '12px', display: 'flex', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <input 
-              type="text" 
-              placeholder="Escribe..." 
-              style={{ flex: 1, padding: '10px', borderRadius: '20px', border: 'none', backgroundColor: 'rgba(255,255,255,0.1)', color: '#fff', outline: 'none', fontSize: '14px' }}
-            />
-            <button style={{ background: 'var(--radar-color)', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              ➤
-            </button>
-          </div>
-        </div>
+        <ChatModal user={activeChat} onClose={() => setActiveChat(null)} />
       )}
 
       {/* Menú de Navegación Inferior */}

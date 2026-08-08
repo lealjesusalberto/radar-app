@@ -58,7 +58,7 @@ const ProfileView = () => {
     bio: '',
     job: '',
     location: '',
-    photo: 'https://i.pravatar.cc/150',
+    photo: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+PHJlY3Qgd2lkdGg9IjE1MCIgaGVpZ2h0PSIxNTAiIGZpbGw9IiMzMzMiLz48L3N2Zz4=', // Blank grey square fallback
     gallery: [],
     interests: []
   };

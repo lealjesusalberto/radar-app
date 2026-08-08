@@ -1,41 +1,71 @@
-export default function ChatsView({ users, onOpenChat }) {
-  // Simulate some users having recent chats
-  const recentChats = users.slice(0, 8).map((user, index) => ({
-    ...user,
-    lastMessage: index % 3 === 0 ? '¿Qué tal todo por allá?' : '¡Hola! Qué bueno encontrarte aquí.',
-    time: index === 0 ? 'Ahora' : `${index * 5}m`,
-    unread: index < 2 ? index + 1 : 0
-  }));
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+
+export default function ChatsView({ onOpenChat }) {
+  const { currentUser } = useAuth();
+  const [chats, setChats] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    // Listen to chats where the current user is a participant
+    const q = query(
+      collection(db, 'chats'), 
+      where('participants', 'array-contains', currentUser.uid)
+    );
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const activeChats = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        // Determine the other user's info
+        const otherUserId = data.participants.find(id => id !== currentUser.uid);
+        const otherUser = data.participantDetails ? data.participantDetails[otherUserId] : null;
+
+        activeChats.push({
+          id: doc.id,
+          otherUserId,
+          name: otherUser ? otherUser.name : 'Usuario',
+          photo: otherUser ? otherUser.photo : 'https://ui-avatars.com/api/?name=U',
+          lastMessage: data.lastMessage || '',
+          lastUpdated: data.lastUpdated ? data.lastUpdated.toMillis() : 0,
+        });
+      });
+      // Sort by latest message
+      activeChats.sort((a, b) => b.lastUpdated - a.lastUpdated);
+      setChats(activeChats);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
 
   return (
-    <div className="view-container">
-      <header className="app-header glass">
-        <h1>Chats</h1>
-      </header>
+    <div style={{ padding: '80px 20px', width: '100%', height: '100%', backgroundColor: 'var(--bg-color)', color: 'white', boxSizing: 'border-box', overflowY: 'auto' }}>
+      <h2>Tus Chats Activos</h2>
+      <p style={{ color: 'var(--text-muted)' }}>Tus conexiones recientes aparecerán aquí.</p>
       
-      <div className="chat-list">
-        {recentChats.map(chat => (
-          <div key={chat.id} className="chat-list-item" onClick={() => onOpenChat(chat)}>
-            <div className={`chat-list-avatar-wrapper ${chat.isOnline ? 'online' : ''}`}>
-              <img src={chat.photoUrl} alt={chat.name} className="chat-list-avatar" />
-            </div>
-            
-            <div className="chat-list-content">
-              <div className="chat-list-header">
-                <span className="chat-list-name">{chat.name}</span>
-                <span className="chat-list-time">{chat.time}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span className={`chat-list-message ${chat.unread > 0 ? 'unread' : ''}`}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+        {chats.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center', marginTop: '40px' }}>No tienes chats activos. ¡Ve al Radar y saluda a alguien!</p>
+        ) : (
+          chats.map(chat => (
+            <div 
+              key={chat.id} 
+              style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'var(--echo-bg)', borderRadius: '12px', cursor: 'pointer' }}
+              onClick={() => onOpenChat({ id: chat.otherUserId, name: chat.name, photo: chat.photo })}
+            >
+              <img src={chat.photo} alt={chat.name} style={{ width: '50px', height: '50px', borderRadius: '50%', border: '2px solid transparent', objectFit: 'cover' }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{chat.name}</h4>
+                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {chat.lastMessage}
-                </span>
-                {chat.unread > 0 && (
-                  <span className="unread-badge">{chat.unread}</span>
-                )}
+                </p>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
