@@ -34,7 +34,7 @@ const AuthView = ({ onLogin }) => {
           gallery: []
         });
       }
-      onLogin();
+      onLogin(!isLogin); // Pass true if registering, false if logging in
     } catch (err) {
       console.error(err);
       setError(err.message);

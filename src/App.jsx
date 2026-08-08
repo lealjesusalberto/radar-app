@@ -90,7 +90,12 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <AuthView onLogin={() => setIsAuthenticated(true)} />;
+    return <AuthView onLogin={(isNew) => {
+      setIsAuthenticated(true);
+      if (isNew) {
+        setActiveTab('perfil');
+      }
+    }} />;
   }
 
   return (

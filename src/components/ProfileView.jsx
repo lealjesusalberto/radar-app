@@ -7,7 +7,14 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 const ProfileView = () => {
   const { userData, currentUser } = useAuth();
   const fileInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  const [editBio, setEditBio] = useState('');
+  const [editJob, setEditJob] = useState('');
+  const [newInterest, setNewInterest] = useState('');
 
   // Usa datos reales, o el mock si userData no ha cargado completamente aún para evitar errores
   const user = userData || {
@@ -19,6 +26,66 @@ const ProfileView = () => {
     photo: 'https://i.pravatar.cc/150',
     gallery: [],
     interests: []
+  };
+
+  const handleEditToggle = async () => {
+    if (isEditing) {
+      // Save changes
+      try {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          bio: editBio,
+          job: editJob
+        });
+      } catch (e) {
+        console.error("Error updating profile", e);
+        alert("Error al guardar: " + e.message);
+      }
+    } else {
+      // Load current values
+      setEditBio(user.bio || '');
+      setEditJob(user.job || '');
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleAddInterest = async (e) => {
+    if (e.key === 'Enter' && newInterest.trim()) {
+      const updatedInterests = [...(user.interests || []), newInterest.trim()];
+      try {
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+          interests: updatedInterests
+        });
+        setNewInterest('');
+      } catch (error) {
+        console.error("Error adding interest", error);
+      }
+    }
+  };
+
+  const handleGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length || !currentUser) return;
+    
+    setUploadingGallery(true);
+    const newGalleryUrls = [];
+    
+    try {
+      for (const file of files) {
+        const storageRef = ref(storage, `users/${currentUser.uid}/gallery_${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        newGalleryUrls.push(downloadURL);
+      }
+      
+      const updatedGallery = [...(user.gallery || []), ...newGalleryUrls];
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        gallery: updatedGallery
+      });
+    } catch (error) {
+      console.error("Error uploading to gallery", error);
+    } finally {
+      setUploadingGallery(false);
+    }
   };
 
   const handlePhotoClick = () => {
@@ -80,11 +147,23 @@ const ProfileView = () => {
         <div style={styles.headerContent}>
           <div style={styles.headerTop}>
             <button style={styles.iconButton}>⚙️</button>
-            <button style={styles.iconButton}>✏️</button>
+            <button style={{...styles.iconButton, backgroundColor: isEditing ? 'var(--radar-color)' : 'rgba(255, 255, 255, 0.15)'}} onClick={handleEditToggle}>
+              {isEditing ? '💾' : '✏️'}
+            </button>
           </div>
           <div style={styles.headerBottom}>
             <h1 style={styles.name}>{user.name} {user.age ? `, ${user.age}` : ''}</h1>
-            <p style={styles.subtitle}>{user.job || 'Usuario de Radar'}</p>
+            {isEditing ? (
+              <input 
+                type="text" 
+                value={editJob} 
+                onChange={e => setEditJob(e.target.value)} 
+                placeholder="Tu profesión" 
+                style={{background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '4px 8px', borderRadius: '4px', marginTop: '4px'}} 
+              />
+            ) : (
+              <p style={styles.subtitle}>{user.job || 'Usuario de Radar'}</p>
+            )}
             <p style={styles.location}>📍 {user.location?.lat ? 'En el Radar' : 'Buscando ubicación...'}</p>
           </div>
         </div>
@@ -114,7 +193,16 @@ const ProfileView = () => {
         {/* Sobre Mí */}
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Sobre Mí</h3>
-          <p style={styles.bioText}>{user.bio}</p>
+          {isEditing ? (
+            <textarea 
+              value={editBio} 
+              onChange={e => setEditBio(e.target.value)} 
+              style={{width: '100%', minHeight: '80px', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px'}}
+              placeholder="Cuéntanos sobre ti..."
+            />
+          ) : (
+            <p style={styles.bioText}>{user.bio || 'Sin descripción.'}</p>
+          )}
         </div>
 
         {/* Intereses */}
@@ -125,11 +213,30 @@ const ProfileView = () => {
               <span key={idx} style={styles.tag}>{interest}</span>
             )) : <p style={styles.bioText}>No has añadido intereses aún.</p>}
           </div>
+          {isEditing && (
+            <input 
+              type="text" 
+              value={newInterest} 
+              onChange={e => setNewInterest(e.target.value)} 
+              onKeyDown={handleAddInterest}
+              placeholder="Escribe un interés y presiona Enter..." 
+              style={{marginTop: '12px', width: '100%', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px', outline: 'none'}}
+            />
+          )}
         </div>
 
         {/* Galería de Fotos */}
         <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Galería</h3>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+            <h3 style={{...styles.sectionTitle, marginBottom: 0}}>Galería</h3>
+            {isEditing && (
+              <>
+                <button onClick={() => galleryInputRef.current?.click()} style={{background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>+</button>
+                <input type="file" ref={galleryInputRef} onChange={handleGalleryUpload} multiple accept="image/*" style={{display: 'none'}} />
+              </>
+            )}
+          </div>
+          {uploadingGallery && <p style={{color: 'var(--radar-color)', fontSize: '12px', marginBottom: '8px'}}>Subiendo fotos a la galería...</p>}
           <div style={styles.galleryGrid}>
             {user.gallery && user.gallery.length > 0 ? user.gallery.map((img, idx) => (
               <div key={idx} style={styles.galleryItem}>
@@ -179,11 +286,13 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: '24px 20px',
+    pointerEvents: 'none', // Allow clicks to pass through to the image
   },
   headerTop: {
     display: 'flex',
     justifyContent: 'space-between',
     marginTop: '16px',
+    pointerEvents: 'auto', // Re-enable clicks for the buttons container
   },
   iconButton: {
     width: '40px',
@@ -198,11 +307,13 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     cursor: 'pointer',
+    pointerEvents: 'auto', // Re-enable clicks
   },
   headerBottom: {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
+    pointerEvents: 'auto', // Re-enable clicks for inputs
   },
   name: {
     fontSize: '32px',
