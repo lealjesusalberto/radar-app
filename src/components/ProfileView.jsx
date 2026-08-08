@@ -1,21 +1,58 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { db, storage } from '../firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const ProfileView = () => {
-  // Mock data para una app de citas / radar social premium
-  const user = {
-    name: 'Tú',
-    age: 26,
-    bio: 'Aventurero, amante de la tecnología y siempre buscando la próxima gran historia. 🌎📸',
-    job: 'Product Designer en TechCorp',
-    location: 'A 0km de ti',
-    mainPhoto: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1528892952291-009c663ce843?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80'
-    ],
-    interests: ['Diseño', 'Viajes', 'Fotografía', 'Café', 'Startups']
+  const { userData, currentUser } = useAuth();
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
+  // Usa datos reales, o el mock si userData no ha cargado completamente aún para evitar errores
+  const user = userData || {
+    name: 'Cargando...',
+    age: '',
+    bio: '',
+    job: '',
+    location: '',
+    photo: 'https://i.pravatar.cc/150',
+    gallery: [],
+    interests: []
+  };
+
+  const handlePhotoClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !currentUser) return;
+
+    try {
+      setUploading(true);
+      // Create a reference to the file in Firebase Storage
+      const storageRef = ref(storage, `users/${currentUser.uid}/profile_${Date.now()}`);
+      
+      // Upload the file
+      await uploadBytes(storageRef, file);
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(storageRef);
+      
+      // Update Firestore user document
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        photo: downloadURL
+      });
+      
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      alert("Hubo un error al subir la foto.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -24,7 +61,21 @@ const ProfileView = () => {
       {/* Header Premium con Foto Principal */}
       <div style={styles.header}>
         <div style={styles.imageOverlay}></div>
-        <img src={user.mainPhoto} alt="Foto principal" style={styles.headerImage} />
+        <img 
+          src={user.photo} 
+          alt="Foto principal" 
+          style={{...styles.headerImage, opacity: uploading ? 0.5 : 1, cursor: 'pointer'}} 
+          onClick={handlePhotoClick}
+        />
+        {uploading && <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, color: 'white'}}>Subiendo...</div>}
+        
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          onChange={handleFileChange} 
+          style={{ display: 'none' }} 
+          accept="image/*"
+        />
         
         <div style={styles.headerContent}>
           <div style={styles.headerTop}>
@@ -32,9 +83,9 @@ const ProfileView = () => {
             <button style={styles.iconButton}>✏️</button>
           </div>
           <div style={styles.headerBottom}>
-            <h1 style={styles.name}>{user.name}, {user.age}</h1>
-            <p style={styles.subtitle}>{user.job}</p>
-            <p style={styles.location}>📍 {user.location}</p>
+            <h1 style={styles.name}>{user.name} {user.age ? `, ${user.age}` : ''}</h1>
+            <p style={styles.subtitle}>{user.job || 'Usuario de Radar'}</p>
+            <p style={styles.location}>📍 {user.location?.lat ? 'En el Radar' : 'Buscando ubicación...'}</p>
           </div>
         </div>
       </div>
@@ -70,9 +121,9 @@ const ProfileView = () => {
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Intereses</h3>
           <div style={styles.tagsContainer}>
-            {user.interests.map((interest, idx) => (
+            {user.interests && user.interests.length > 0 ? user.interests.map((interest, idx) => (
               <span key={idx} style={styles.tag}>{interest}</span>
-            ))}
+            )) : <p style={styles.bioText}>No has añadido intereses aún.</p>}
           </div>
         </div>
 
@@ -80,11 +131,11 @@ const ProfileView = () => {
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Galería</h3>
           <div style={styles.galleryGrid}>
-            {user.gallery.map((img, idx) => (
+            {user.gallery && user.gallery.length > 0 ? user.gallery.map((img, idx) => (
               <div key={idx} style={styles.galleryItem}>
                 <img src={img} alt={`Gallery ${idx}`} style={styles.galleryImage} />
               </div>
-            ))}
+            )) : <p style={styles.bioText}>Aún no tienes fotos en tu galería.</p>}
           </div>
         </div>
 
