@@ -6,9 +6,11 @@ import BottomNav from './components/BottomNav';
 import ProfileView from './components/ProfileView';
 import PublicProfileView from './components/PublicProfileView';
 import OnboardingScreen from './components/OnboardingScreen';
+import AuthView from './components/AuthView';
 
 function App() {
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('radar');
   const [selectedEcho, setSelectedEcho] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
@@ -85,6 +87,10 @@ function App() {
 
   if (showOnboarding) {
     return <OnboardingScreen onEnter={() => setShowOnboarding(false)} />;
+  }
+
+  if (!isAuthenticated) {
+    return <AuthView onLogin={() => setIsAuthenticated(true)} />;
   }
 
   return (
