@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null); // Data from Firestore
   const [loading, setLoading] = useState(true);
   const [unreadChatsCount, setUnreadChatsCount] = useState(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
 
   useEffect(() => {
     let userUnsub;
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let chatsUnsub;
+    let notifsUnsub;
     if (currentUser) {
       import('firebase/firestore').then(({ collection, query, where, onSnapshot }) => {
         const q = query(
@@ -61,10 +63,20 @@ export const AuthProvider = ({ children }) => {
           });
           setUnreadChatsCount(totalUnread);
         });
+
+        const notifsQ = query(
+          collection(db, 'notifications'),
+          where('recipientId', '==', currentUser.uid),
+          where('read', '==', false)
+        );
+        notifsUnsub = onSnapshot(notifsQ, (snapshot) => {
+          setUnreadNotificationsCount(snapshot.size);
+        });
       });
     }
     return () => {
       if (chatsUnsub) chatsUnsub();
+      if (notifsUnsub) notifsUnsub();
     };
   }, [currentUser]);
 
@@ -98,7 +110,8 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     userData,
     loading,
-    unreadChatsCount
+    unreadChatsCount,
+    unreadNotificationsCount
   };
 
   return (

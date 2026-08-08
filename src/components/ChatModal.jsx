@@ -61,6 +61,18 @@ export default function ChatModal({ user, onClose }) {
         [`unread_${user.id}`]: increment(1),
         [`unread_${currentUser.uid}`]: 0 // Reset my own just in case
       }, { merge: true });
+
+      // Add to global notifications collection
+      await addDoc(collection(db, 'notifications'), {
+        recipientId: user.id,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || 'Alguien',
+        senderPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=U',
+        type: 'message',
+        messagePreview: text.substring(0, 30) + (text.length > 30 ? '...' : ''),
+        read: false,
+        timestamp: serverTimestamp()
+      });
       
     } catch (error) {
       console.error("Error sending message", error);

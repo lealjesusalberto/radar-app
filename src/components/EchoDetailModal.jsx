@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 
 const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
   const [showFullProfile, setShowFullProfile] = useState(false);
   const [liked, setLiked] = useState(false);
+  const { currentUser } = useAuth();
 
   if (!echo) return null;
 
-  const handleLike = () => {
+  const handleLike = async () => {
     setLiked(!liked);
     if (onLike) onLike(echo, !liked);
+
+    // Only notify when liking (not unliking), and if there's a currentUser
+    if (!liked && currentUser && echo.user.id) {
+      try {
+        await addDoc(collection(db, 'notifications'), {
+          recipientId: echo.user.id,
+          senderId: currentUser.uid,
+          senderName: currentUser.displayName || 'Alguien',
+          senderPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=U',
+          type: 'like',
+          read: false,
+          timestamp: serverTimestamp()
+        });
+      } catch (err) {
+        console.error("Error al enviar notificación de like", err);
+      }
+    }
   };
 
   const handleViewProfileClick = () => {

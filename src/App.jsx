@@ -9,6 +9,7 @@ import OnboardingScreen from './components/OnboardingScreen';
 import AuthView from './components/AuthView';
 import ChatModal from './components/ChatModal';
 import ChatsView from './components/ChatsView';
+import NotificationsModal from './components/NotificationsModal';
 import { useAuth } from './context/AuthContext';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -39,6 +40,8 @@ function App() {
   const [activeChat, setActiveChat] = useState(null);
   const [publicProfileUser, setPublicProfileUser] = useState(null);
   const [echoes, setEchoes] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { unreadNotificationsCount } = useAuth();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -155,6 +158,29 @@ function App() {
           RADAR <span style={{ color: 'var(--radar-color)' }}>APP</span>
         </h1>
       </div>
+
+      {/* Botón de Notificaciones */}
+      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
+        <button 
+          onClick={() => setShowNotifications(!showNotifications)}
+          style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', position: 'relative', backdropFilter: 'blur(5px)' }}
+        >
+          <span style={{ fontSize: '20px' }}>🔔</span>
+          {unreadNotificationsCount > 0 && (
+            <div style={{ position: 'absolute', top: '-2px', right: '-2px', background: 'red', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+              {unreadNotificationsCount}
+            </div>
+          )}
+        </button>
+      </div>
+
+      {/* Modal de Notificaciones */}
+      {showNotifications && (
+        <NotificationsModal 
+          onClose={() => setShowNotifications(false)} 
+          onOpenChat={handleChat} 
+        />
+      )}
 
       {/* Vistas según el Tab Activo */}
       {activeTab === 'radar' && (
