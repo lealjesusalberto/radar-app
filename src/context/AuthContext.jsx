@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null); // Data from Firestore
   const [loading, setLoading] = useState(true);
+  const [unreadChatsCount, setUnreadChatsCount] = useState(0);
 
   useEffect(() => {
     let userUnsub;
@@ -43,6 +44,31 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    let chatsUnsub;
+    if (currentUser) {
+      import('firebase/firestore').then(({ collection, query, where, onSnapshot }) => {
+        const q = query(
+          collection(db, 'chats'), 
+          where('participants', 'array-contains', currentUser.uid)
+        );
+        chatsUnsub = onSnapshot(q, (snapshot) => {
+          let totalUnread = 0;
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data[`unread_${currentUser.uid}`]) {
+              totalUnread += data[`unread_${currentUser.uid}`];
+            }
+          });
+          setUnreadChatsCount(totalUnread);
+        });
+      });
+    }
+    return () => {
+      if (chatsUnsub) chatsUnsub();
+    };
+  }, [currentUser]);
+
+  useEffect(() => {
     let watchId;
     if (currentUser && navigator.geolocation) {
       watchId = navigator.geolocation.watchPosition(
@@ -71,7 +97,8 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     userData,
-    loading
+    loading,
+    unreadChatsCount
   };
 
   return (

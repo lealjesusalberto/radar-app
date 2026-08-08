@@ -188,7 +188,7 @@ function App() {
       )}
 
       {/* Chat en tiempo real */}
-      {activeChat && activeTab === 'radar' && (
+      {activeChat && (
         <ChatModal user={activeChat} onClose={() => setActiveChat(null)} />
       )}
 

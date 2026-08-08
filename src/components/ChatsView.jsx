@@ -31,6 +31,7 @@ export default function ChatsView({ onOpenChat }) {
           photo: otherUser ? otherUser.photo : 'https://ui-avatars.com/api/?name=U',
           lastMessage: data.lastMessage || '',
           lastUpdated: data.lastUpdated ? data.lastUpdated.toMillis() : 0,
+          unread: data[`unread_${currentUser.uid}`] || 0
         });
       });
       // Sort by latest message
@@ -53,16 +54,21 @@ export default function ChatsView({ onOpenChat }) {
           chats.map(chat => (
             <div 
               key={chat.id} 
-              style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'var(--echo-bg)', borderRadius: '12px', cursor: 'pointer' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', backgroundColor: 'var(--echo-bg)', borderRadius: '12px', cursor: 'pointer', position: 'relative' }}
               onClick={() => onOpenChat({ id: chat.otherUserId, name: chat.name, photo: chat.photo })}
             >
               <img src={chat.photo} alt={chat.name} style={{ width: '50px', height: '50px', borderRadius: '50%', border: '2px solid transparent', objectFit: 'cover' }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h4 style={{ margin: '0 0 4px 0', fontSize: '16px' }}>{chat.name}</h4>
-                <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <p style={{ margin: 0, fontSize: '14px', color: chat.unread > 0 ? '#fff' : 'var(--text-muted)', fontWeight: chat.unread > 0 ? 'bold' : 'normal', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {chat.lastMessage}
                 </p>
               </div>
+              {chat.unread > 0 && (
+                <div style={{ backgroundColor: 'var(--radar-color)', color: '#000', fontSize: '12px', fontWeight: 'bold', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {chat.unread}
+                </div>
+              )}
             </div>
           ))
         )}

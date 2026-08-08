@@ -1,6 +1,9 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const BottomNav = ({ activeTab, onChangeTab }) => {
+  const { unreadChatsCount } = useAuth();
+
   return (
     <div style={styles.outerContainer}>
       <div style={styles.navContainer}>
@@ -29,6 +32,11 @@ const BottomNav = ({ activeTab, onChangeTab }) => {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={activeTab === 'chats' ? '#000' : 'var(--text-muted)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
+            {unreadChatsCount > 0 && (
+              <div style={{ position: 'absolute', top: '0', right: '0', background: 'red', color: 'white', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', border: '2px solid var(--echo-bg)' }}>
+                {unreadChatsCount}
+              </div>
+            )}
           </div>
           {activeTab === 'chats' && <span style={styles.activeDot}></span>}
         </button>

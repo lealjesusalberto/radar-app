@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc, doc, increment } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 export default function ChatModal({ user, onClose }) {
@@ -13,6 +13,11 @@ export default function ChatModal({ user, onClose }) {
 
   useEffect(() => {
     if (!currentUser || !user) return;
+
+    // Reset unread count when opening the chat
+    setDoc(doc(db, 'chats', chatId), {
+      [`unread_${currentUser.uid}`]: 0
+    }, { merge: true }).catch(console.error);
 
     const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -44,7 +49,7 @@ export default function ChatModal({ user, onClose }) {
         timestamp: serverTimestamp()
       });
 
-      // Update chat metadata
+      // Update chat metadata and increment unread for the OTHER user
       await setDoc(doc(db, 'chats', chatId), {
         participants: [currentUser.uid, user.id],
         participantDetails: {
@@ -52,7 +57,9 @@ export default function ChatModal({ user, onClose }) {
            [user.id]: { name: user.name, photo: user.photo }
         },
         lastMessage: text,
-        lastUpdated: serverTimestamp()
+        lastUpdated: serverTimestamp(),
+        [`unread_${user.id}`]: increment(1),
+        [`unread_${currentUser.uid}`]: 0 // Reset my own just in case
       }, { merge: true });
       
     } catch (error) {
