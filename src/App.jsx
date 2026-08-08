@@ -143,7 +143,7 @@ function App() {
   }
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100dvh', position: 'relative', overflow: 'hidden' }}>
       
       {/* Título flotante UI */}
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 10 }}>
