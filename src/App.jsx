@@ -83,6 +83,10 @@ function App() {
         const x = 50 + radiusPct * Math.cos(angle);
         const y = 50 + radiusPct * Math.sin(angle); // Invert Y if you want North to be up, but standard math is fine for stability
 
+        const userPhoto = data.photo && !data.photo.includes('pravatar')
+          ? data.photo
+          : `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=0D8BFF&color=fff`;
+
         realEchoes.push({
           id: doc.id,
           message: data.bio ? data.bio.substring(0, 40) + '...' : '¡Hola, estoy en Radar!',
@@ -92,8 +96,8 @@ function App() {
             id: doc.id,
             name: data.name,
             age: data.age || '',
-            photo: data.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=0D8BFF&color=fff`,
-            mainPhoto: data.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=0D8BFF&color=fff`,
+            photo: userPhoto,
+            mainPhoto: userPhoto,
             bio: data.bio || '',
             interests: data.interests || [],
             isPro: data.isPro || false,

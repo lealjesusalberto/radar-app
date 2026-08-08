@@ -4,7 +4,7 @@ import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc
 import { useAuth } from '../context/AuthContext';
 
 export default function ChatModal({ user, onClose }) {
-  const { currentUser } = useAuth();
+  const { currentUser, userData } = useAuth();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -49,11 +49,15 @@ export default function ChatModal({ user, onClose }) {
         timestamp: serverTimestamp()
       });
 
+      const myPhoto = userData?.photo && !userData.photo.includes('pravatar')
+        ? userData.photo
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'Yo')}&background=0D8BFF&color=fff`;
+
       // Update chat metadata and increment unread for the OTHER user
       await setDoc(doc(db, 'chats', chatId), {
         participants: [currentUser.uid, user.id],
         participantDetails: {
-           [currentUser.uid]: { name: currentUser.displayName || 'Yo', photo: currentUser.photoURL || '' },
+           [currentUser.uid]: { name: userData?.name || 'Yo', photo: myPhoto },
            [user.id]: { name: user.name, photo: user.photo }
         },
         lastMessage: text,
@@ -66,8 +70,8 @@ export default function ChatModal({ user, onClose }) {
       await addDoc(collection(db, 'notifications'), {
         recipientId: user.id,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || 'Alguien',
-        senderPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=U',
+        senderName: userData?.name || 'Alguien',
+        senderPhoto: myPhoto,
         type: 'message',
         messagePreview: text.substring(0, 30) + (text.length > 30 ? '...' : ''),
         read: false,

@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
   const [showFullProfile, setShowFullProfile] = useState(false);
   const [liked, setLiked] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, userData } = useAuth();
 
   useEffect(() => {
     if (echo) {
@@ -23,12 +23,16 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
 
     // Only notify when liking (not unliking), and if there's a currentUser
     if (!liked && currentUser && echo.user.id) {
+      const myPhoto = userData?.photo && !userData.photo.includes('pravatar')
+        ? userData.photo
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'Yo')}&background=0D8BFF&color=fff`;
+
       try {
         await addDoc(collection(db, 'notifications'), {
           recipientId: echo.user.id,
           senderId: currentUser.uid,
-          senderName: currentUser.displayName || 'Alguien',
-          senderPhoto: currentUser.photoURL || 'https://ui-avatars.com/api/?name=U',
+          senderName: userData?.name || 'Alguien',
+          senderPhoto: myPhoto,
           type: 'like',
           read: false,
           timestamp: serverTimestamp()

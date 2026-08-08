@@ -24,11 +24,15 @@ export default function ChatsView({ onOpenChat }) {
         const otherUserId = data.participants.find(id => id !== currentUser.uid);
         const otherUser = data.participantDetails ? data.participantDetails[otherUserId] : null;
 
+        const otherUserPhoto = otherUser && otherUser.photo && !otherUser.photo.includes('pravatar')
+          ? otherUser.photo
+          : `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser ? otherUser.name : 'U')}&background=0D8BFF&color=fff`;
+
         activeChats.push({
           id: doc.id,
           otherUserId,
           name: otherUser ? otherUser.name : 'Usuario',
-          photo: otherUser ? otherUser.photo : 'https://ui-avatars.com/api/?name=U',
+          photo: otherUserPhoto,
           lastMessage: data.lastMessage || '',
           lastUpdated: data.lastUpdated ? data.lastUpdated.toMillis() : 0,
           unread: data[`unread_${currentUser.uid}`] || 0
