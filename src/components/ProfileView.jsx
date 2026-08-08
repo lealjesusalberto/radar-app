@@ -131,10 +131,22 @@ const ProfileView = () => {
         <img 
           src={user.photo} 
           alt="Foto principal" 
-          style={{...styles.headerImage, opacity: uploading ? 0.5 : 1, cursor: 'pointer'}} 
-          onClick={handlePhotoClick}
+          style={{...styles.headerImage, opacity: uploading ? 0.5 : 1}} 
         />
-        {uploading && <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, color: 'white'}}>Subiendo...</div>}
+        {isEditing && (
+          <button 
+            onClick={handlePhotoClick}
+            style={{
+              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+              zIndex: 10, background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.3)',
+              color: 'white', borderRadius: '50%', width: '60px', height: '60px',
+              display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px', cursor: 'pointer', pointerEvents: 'auto'
+            }}
+          >
+            📷
+          </button>
+        )}
+        {uploading && <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, color: 'white', background: 'rgba(0,0,0,0.7)', padding: '8px 16px', borderRadius: '20px'}}>Subiendo...</div>}
         
         <input 
           type="file" 

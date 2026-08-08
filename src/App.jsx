@@ -7,8 +7,29 @@ import ProfileView from './components/ProfileView';
 import PublicProfileView from './components/PublicProfileView';
 import OnboardingScreen from './components/OnboardingScreen';
 import AuthView from './components/AuthView';
+import { useAuth } from './context/AuthContext';
+import { db } from './firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180);
+}
+
+function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 999999;
+  const R = 6371e3; // Radius of the earth in m
+  const dLat = deg2rad(lat2-lat1);  
+  const dLon = deg2rad(lon2-lon1); 
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2); 
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  return R * c; // Distance in m
+}
 
 function App() {
+  const { currentUser, userData } = useAuth();
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('radar');
@@ -18,47 +39,61 @@ function App() {
   const [echoes, setEchoes] = useState([]);
 
   useEffect(() => {
-    const mockUsers = [
-      { 
-        id: 1, message: '¿Alguien para tomar un café rápido?', distance: 150,
-        user: { name: 'Ana', age: 26, photo: 'https://i.pravatar.cc/150?img=1', mainPhoto: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80', bio: 'Amante del buen café.', interests: ['Café', 'Tech'], isPro: false, job: 'Diseñadora', gallery: ['https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80'] }
-      },
-      { 
-        id: 2, message: 'Recomienden un buen lugar de sushi por aquí.', distance: 350,
-        user: { 
-          name: 'Carlos', age: 30, photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80', mainPhoto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', bio: 'Foodie empedernido. Me encanta viajar.', interests: ['Comida', 'Cine', 'Viajes'], isPro: true, job: 'Chef', gallery: ['https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80'] 
-        }
-      },
-      { 
-        id: 3, message: 'Trabajando desde el coworking.', distance: 750,
-        user: { name: 'Laura', age: 28, photo: 'https://i.pravatar.cc/150?img=5', mainPhoto: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80', bio: 'Desarrolladora Fullstack.', interests: ['Code', 'Startups'], isPro: false, job: 'Ingeniera de Software', gallery: ['https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80'] }
-      },
-      { 
-        id: 4, message: 'Quiero jugar tenis a las 6pm', distance: 50,
-        user: { 
-          name: 'Miguel', age: 24, photo: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&q=80', mainPhoto: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80', bio: 'Deportista 24/7.', interests: ['Tenis', 'Deportes'], isPro: true, job: 'Atleta', gallery: ['https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80', 'https://images.unsplash.com/photo-1528892952291-009c663ce843?auto=format&fit=crop&w=400&q=80']
-        }
-      },
-      { 
-        id: 5, message: 'Paseando al perro 🐕', distance: 200,
-        user: { name: 'Sofía', age: 22, photo: 'https://i.pravatar.cc/150?img=9', mainPhoto: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80', bio: 'Dog lover.', interests: ['Mascotas', 'Parques'], isPro: false, job: 'Estudiante', gallery: ['https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80'] }
-      },
-    ];
+    if (!currentUser) return;
 
-    const MAX_DISTANCE = 1000;
-    
-    const initializedEchoes = mockUsers.map(echo => {
-      const radiusPct = (echo.distance / MAX_DISTANCE) * 45;
-      const angle = Math.random() * Math.PI * 2; 
-      
-      const x = 50 + radiusPct * Math.cos(angle);
-      const y = 50 + radiusPct * Math.sin(angle);
-      
-      return { ...echo, x, y };
+    const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+      const MAX_DISTANCE = 5000; // 5km
+      const realEchoes = [];
+
+      snapshot.forEach(doc => {
+        if (doc.id === currentUser.uid) return; // Skip self
+
+        const data = doc.data();
+        if (!data.location || !data.location.lat) return; // Skip users without location
+
+        let distance = 999999;
+        if (userData?.location?.lat) {
+          distance = getDistanceInMeters(
+            userData.location.lat, userData.location.lng,
+            data.location.lat, data.location.lng
+          );
+        }
+
+        // Generate radar position based on distance
+        // Map distance to a radius between 10 and 45
+        let radiusPct = (distance / MAX_DISTANCE) * 45;
+        if (radiusPct > 45) radiusPct = 45; // Cap at edge
+        if (radiusPct < 5) radiusPct = 5;   // Don't spawn exactly in center
+
+        const angle = Math.random() * Math.PI * 2; 
+        const x = 50 + radiusPct * Math.cos(angle);
+        const y = 50 + radiusPct * Math.sin(angle);
+
+        realEchoes.push({
+          id: doc.id,
+          message: data.bio ? data.bio.substring(0, 40) + '...' : '¡Hola, estoy en Radar!',
+          distance: Math.round(distance),
+          x, y,
+          user: {
+            id: doc.id,
+            name: data.name,
+            age: data.age || '',
+            photo: data.photo || 'https://i.pravatar.cc/150',
+            mainPhoto: data.photo || 'https://i.pravatar.cc/150',
+            bio: data.bio || '',
+            interests: data.interests || [],
+            isPro: data.isPro || false,
+            job: data.job || '',
+            gallery: data.gallery || []
+          }
+        });
+      });
+
+      setEchoes(realEchoes);
     });
 
-    setEchoes(initializedEchoes);
-  }, []);
+    return () => unsubscribe();
+  }, [currentUser, userData]);
 
   const handleEchoClick = (echo) => setSelectedEcho(echo);
   const closeEchoDetail = () => setSelectedEcho(null);
