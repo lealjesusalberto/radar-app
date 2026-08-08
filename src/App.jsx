@@ -164,22 +164,24 @@ function App() {
       </div>
 
       {/* Botón de Notificaciones */}
-      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
-        <button 
-          onClick={() => setShowNotifications(!showNotifications)}
-          style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', position: 'relative', backdropFilter: 'blur(5px)', color: 'var(--text-muted)' }}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
-          {unreadNotificationsCount > 0 && (
-            <div style={{ position: 'absolute', top: '-2px', right: '-2px', background: 'red', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-              {unreadNotificationsCount}
-            </div>
-          )}
-        </button>
-      </div>
+      {activeTab !== 'perfil' && (
+        <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', position: 'relative', backdropFilter: 'blur(5px)', color: 'var(--text-muted)' }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            {unreadNotificationsCount > 0 && (
+              <div style={{ position: 'absolute', top: '-2px', right: '-2px', background: 'red', color: 'white', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                {unreadNotificationsCount}
+              </div>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Modal de Notificaciones */}
       {showNotifications && (
