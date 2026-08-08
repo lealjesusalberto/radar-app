@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -13,27 +13,33 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let userUnsub;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', user.uid));
-          if (userDoc.exists()) {
-            setUserData({ id: user.uid, ...userDoc.data() });
+        userUnsub = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+          if (docSnap.exists()) {
+            setUserData({ id: user.uid, ...docSnap.data() });
           } else {
             setUserData(null);
           }
-        } catch (error) {
+          setLoading(false);
+        }, (error) => {
           console.error("Error fetching user data:", error);
           setUserData(null);
-        }
+          setLoading(false);
+        });
       } else {
         setUserData(null);
+        setLoading(false);
+        if (userUnsub) userUnsub();
       }
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      if (userUnsub) userUnsub();
+    };
   }, []);
 
   useEffect(() => {
