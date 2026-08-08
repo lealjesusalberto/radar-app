@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { DEFAULT_USER_AVATAR } from '../utils/constants';
 
 const AuthView = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,7 +31,7 @@ const AuthView = ({ onLogin }) => {
           interests: [],
           isPro: false,
           job: '',
-          photo: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8BFF&color=fff`,
+          photo: DEFAULT_USER_AVATAR,
           gallery: []
         });
       }

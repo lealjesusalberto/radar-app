@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc, doc, increment } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { DEFAULT_USER_AVATAR } from '../utils/constants';
 
 export default function ChatModal({ user, onClose }) {
   const { currentUser, userData } = useAuth();
@@ -51,7 +52,7 @@ export default function ChatModal({ user, onClose }) {
 
       const myPhoto = userData?.photo && !userData.photo.includes('pravatar')
         ? userData.photo
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'Yo')}&background=0D8BFF&color=fff`;
+        : DEFAULT_USER_AVATAR;
 
       // Update chat metadata and increment unread for the OTHER user
       await setDoc(doc(db, 'chats', chatId), {

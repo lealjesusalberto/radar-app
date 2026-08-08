@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { DEFAULT_USER_AVATAR } from '../utils/constants';
 
 const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
   const [showFullProfile, setShowFullProfile] = useState(false);
@@ -25,7 +26,7 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
     if (!liked && currentUser && echo.user.id) {
       const myPhoto = userData?.photo && !userData.photo.includes('pravatar')
         ? userData.photo
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userData?.name || 'Yo')}&background=0D8BFF&color=fff`;
+        : DEFAULT_USER_AVATAR;
 
       try {
         await addDoc(collection(db, 'notifications'), {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import { DEFAULT_USER_AVATAR } from '../utils/constants';
 
 export default function ChatsView({ onOpenChat }) {
   const { currentUser } = useAuth();
@@ -26,7 +27,7 @@ export default function ChatsView({ onOpenChat }) {
 
         const otherUserPhoto = otherUser && otherUser.photo && !otherUser.photo.includes('pravatar')
           ? otherUser.photo
-          : `https://ui-avatars.com/api/?name=${encodeURIComponent(otherUser ? otherUser.name : 'U')}&background=0D8BFF&color=fff`;
+          : DEFAULT_USER_AVATAR;
 
         activeChats.push({
           id: doc.id,

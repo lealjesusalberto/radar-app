@@ -13,6 +13,7 @@ import NotificationsModal from './components/NotificationsModal';
 import { useAuth } from './context/AuthContext';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
+import { DEFAULT_USER_AVATAR } from './utils/constants';
 
 function deg2rad(deg) {
   return deg * (Math.PI/180);
@@ -85,7 +86,7 @@ function App() {
 
         const userPhoto = data.photo && !data.photo.includes('pravatar')
           ? data.photo
-          : `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=0D8BFF&color=fff`;
+          : DEFAULT_USER_AVATAR;
 
         realEchoes.push({
           id: doc.id,
