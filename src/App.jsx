@@ -44,6 +44,7 @@ function App() {
   const [publicProfileUser, setPublicProfileUser] = useState(null);
   const [echoes, setEchoes] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -203,11 +204,31 @@ function App() {
 
       {/* Vistas según el Tab Activo */}
       {activeTab === 'radar' && (
-        <RadarBackground>
-          {echoes.map(echo => (
-            <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} />
-          ))}
-        </RadarBackground>
+        <>
+          <div style={{ position: 'absolute', top: 80, right: 20, zIndex: 10 }}>
+            <button 
+              onClick={() => {
+                if(isRefreshing) return;
+                setIsRefreshing(true);
+                setTimeout(() => setIsRefreshing(false), 1500);
+              }}
+              style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', backdropFilter: 'blur(5px)', color: 'var(--text-muted)' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }}>
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+            </button>
+          </div>
+          <div style={{ width: '100%', height: '100%', opacity: isRefreshing ? 0.5 : 1, transition: 'opacity 0.3s' }}>
+            <RadarBackground>
+              {echoes.map(echo => (
+                <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} />
+              ))}
+            </RadarBackground>
+          </div>
+        </>
       )}
 
       {/* Pestaña de Chats */}
