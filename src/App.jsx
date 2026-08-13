@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import RadarBackground from './components/RadarBackground';
 import EchoNode from './components/EchoNode';
 import EchoDetailModal from './components/EchoDetailModal';
@@ -222,11 +223,21 @@ function App() {
             </button>
           </div>
           <div style={{ width: '100%', height: '100%', opacity: isRefreshing ? 0.5 : 1, transition: 'opacity 0.3s' }}>
-            <RadarBackground>
-              {echoes.map(echo => (
-                <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} />
-              ))}
-            </RadarBackground>
+            <TransformWrapper
+              initialScale={1}
+              minScale={0.5}
+              maxScale={5}
+              wheel={{ wheelDisabled: false }}
+              pinch={{ disabled: false }}
+            >
+              <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
+                <RadarBackground>
+                  {echoes.map(echo => (
+                    <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} />
+                  ))}
+                </RadarBackground>
+              </TransformComponent>
+            </TransformWrapper>
           </div>
         </>
       )}
