@@ -1,12 +1,13 @@
 import React from 'react';
 
-const EchoNode = ({ echo, onClick }) => {
+const EchoNode = ({ echo, onClick, zoomScale = 1 }) => {
   // Convertimos las coordenadas (porcentaje) a posición absoluta dentro del contenedor del radar
+  // Aplicamos un scale inverso para que los nodos mantengan su tamaño visual al hacer zoom
   const positionStyle = {
     position: 'absolute',
     left: `${echo.x}%`,
     top: `${echo.y}%`,
-    transform: 'translate(-50%, -50%)',
+    transform: `translate(-50%, -50%) scale(${1 / zoomScale})`,
     cursor: 'pointer',
     animation: 'float 3s ease-in-out infinite',
     zIndex: 25,

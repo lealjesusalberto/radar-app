@@ -230,13 +230,15 @@ function App() {
               wheel={{ wheelDisabled: false }}
               pinch={{ disabled: false }}
             >
-              <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-                <RadarBackground>
-                  {echoes.map(echo => (
-                    <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} />
-                  ))}
-                </RadarBackground>
-              </TransformComponent>
+              {({ state }) => (
+                <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
+                  <RadarBackground>
+                    {echoes.map(echo => (
+                      <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} zoomScale={state.scale} />
+                    ))}
+                  </RadarBackground>
+                </TransformComponent>
+              )}
             </TransformWrapper>
           </div>
         </>
