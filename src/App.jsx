@@ -34,16 +34,16 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
 }
 
 function App() {
-  const { currentUser, userData } = useAuth();
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { currentUser, userData, loading, unreadNotificationsCount } = useAuth();
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return localStorage.getItem('orbit_onboarding_done') !== 'true';
+  });
   const [activeTab, setActiveTab] = useState('radar');
   const [selectedEcho, setSelectedEcho] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [publicProfileUser, setPublicProfileUser] = useState(null);
   const [echoes, setEchoes] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { unreadNotificationsCount } = useAuth();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -142,13 +142,23 @@ function App() {
     setPublicProfileUser(user);
   };
 
-  if (showOnboarding) {
-    return <OnboardingScreen onEnter={() => setShowOnboarding(false)} />;
+  if (loading) {
+    return (
+      <div style={{ width: '100vw', height: '100dvh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
+         <img src="/orbit.png" alt="Cargando..." style={{ width: '80px', opacity: 0.5, animation: 'pulse 1.5s infinite ease-in-out' }} />
+      </div>
+    );
   }
 
-  if (!isAuthenticated) {
+  if (showOnboarding && !currentUser) {
+    return <OnboardingScreen onEnter={() => {
+      localStorage.setItem('orbit_onboarding_done', 'true');
+      setShowOnboarding(false);
+    }} />;
+  }
+
+  if (!currentUser) {
     return <AuthView onLogin={(isNew) => {
-      setIsAuthenticated(true);
       if (isNew) {
         setActiveTab('perfil');
       }
