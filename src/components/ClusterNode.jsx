@@ -1,11 +1,10 @@
 import React from 'react';
 
-const EchoNode = ({ echo, onClick }) => {
-  // Convertimos las coordenadas (porcentaje) a posición absoluta dentro del contenedor del radar
+const ClusterNode = ({ count, x, y, onClick }) => {
   const positionStyle = {
     position: 'absolute',
-    left: `${echo.x}%`,
-    top: `${echo.y}%`,
+    left: `${x}%`,
+    top: `${y}%`,
     transform: `translate(-50%, -50%)`,
     cursor: 'pointer',
     animation: 'float 3s ease-in-out infinite',
@@ -16,20 +15,20 @@ const EchoNode = ({ echo, onClick }) => {
     gap: '4px',
   };
 
-  const avatarContainerStyle = {
+  const bubbleStyle = {
     width: '45px',
     height: '45px',
     borderRadius: '50%',
+    backgroundColor: 'var(--radar-color)',
+    color: '#0f172a',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontWeight: 'bold',
+    fontSize: '18px',
+    border: '2px solid rgba(255,255,255,0.8)',
+    boxShadow: '0 0 15px var(--radar-color-glow)',
     animation: 'pulseGlow 2s infinite',
-    border: '2px solid var(--radar-color)',
-    overflow: 'hidden',
-    boxShadow: '0 0 10px var(--radar-color-glow)',
-  };
-
-  const avatarImageStyle = {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
   };
 
   const distanceBadgeStyle = {
@@ -41,19 +40,19 @@ const EchoNode = ({ echo, onClick }) => {
     border: '1px solid var(--radar-color-dim)',
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
-    pointerEvents: 'none', // Para no interferir con el click en el avatar
+    pointerEvents: 'none',
   };
 
   return (
-    <div style={positionStyle} onClick={() => onClick(echo)}>
-      <div style={avatarContainerStyle}>
-        <img src={echo.user.photo} alt={echo.user.name} style={avatarImageStyle} />
+    <div style={positionStyle} onClick={(e) => { e.stopPropagation(); onClick(); }}>
+      <div style={bubbleStyle}>
+        +{count}
       </div>
       <div style={distanceBadgeStyle}>
-        {parseFloat((echo.distance / 1000).toFixed(2))} km
+        Expandir
       </div>
     </div>
   );
 };
 
-export default EchoNode;
+export default ClusterNode;

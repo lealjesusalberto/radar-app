@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import React, { useState, useEffect, useMemo } from 'react';
 import RadarBackground from './components/RadarBackground';
 import EchoNode from './components/EchoNode';
+import ClusterNode from './components/ClusterNode';
 import EchoDetailModal from './components/EchoDetailModal';
 import BottomNav from './components/BottomNav';
 import ProfileView from './components/ProfileView';
@@ -46,6 +46,7 @@ function App() {
   const [echoes, setEchoes] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [expandedClusterId, setExpandedClusterId] = useState(null);
   const [zoomScale, setZoomScale] = useState(1);
 
   useEffect(() => {
@@ -145,6 +146,27 @@ function App() {
     setPublicProfileUser(user);
   };
 
+  const clusters = useMemo(() => {
+    const CLUSTER_DISTANCE = 8; // porcentaje de distancia para agrupar
+    const getDistance = (e1, e2) => Math.sqrt(Math.pow(e1.x - e2.x, 2) + Math.pow(e1.y - e2.y, 2));
+
+    let availableEchoes = [...echoes];
+    let resultClusters = [];
+    
+    while (availableEchoes.length > 0) {
+      const current = availableEchoes.shift();
+      const cluster = [current];
+      
+      for (let i = availableEchoes.length - 1; i >= 0; i--) {
+        if (getDistance(current, availableEchoes[i]) < CLUSTER_DISTANCE) {
+          cluster.push(availableEchoes.splice(i, 1)[0]);
+        }
+      }
+      resultClusters.push(cluster);
+    }
+    return resultClusters;
+  }, [echoes]);
+
   if (loading) {
     return (
       <div style={{ width: '100vw', height: '100dvh', display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
@@ -223,26 +245,51 @@ function App() {
               </svg>
             </button>
           </div>
-          <div style={{ width: '100%', height: '100%', opacity: isRefreshing ? 0.5 : 1, transition: 'opacity 0.3s' }}>
-            <TransformWrapper
-              initialScale={1}
-              minScale={0.5}
-              maxScale={5}
-              wheel={{ wheelDisabled: false }}
-              pinch={{ disabled: false }}
-              onTransformed={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
-              onZoom={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
-              onPinching={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
-              onInit={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
-            >
-              <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-                <RadarBackground>
-                  {echoes.map(echo => (
-                    <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} />
-                  ))}
-                </RadarBackground>
-              </TransformComponent>
-            </TransformWrapper>
+          <div style={{ width: '100%', height: '100%', opacity: isRefreshing ? 0.5 : 1, transition: 'opacity 0.3s' }} onClick={() => setExpandedClusterId(null)}>
+            <RadarBackground>
+              {clusters.map((cluster, clusterIndex) => {
+                if (cluster.length === 1) {
+                  return <EchoNode key={cluster[0].id} echo={cluster[0]} onClick={handleEchoClick} />;
+                }
+                
+                if (expandedClusterId === clusterIndex) {
+                  const radius = 12; // Radius in percentage
+                  const angleStep = (2 * Math.PI) / cluster.length;
+                  const cx = cluster[0].x;
+                  const cy = cluster[0].y;
+                  
+                  return cluster.map((echo, i) => {
+                    const angle = i * angleStep;
+                    const expandedEcho = {
+                      ...echo,
+                      x: cx + radius * Math.cos(angle),
+                      y: cy + radius * Math.sin(angle)
+                    };
+                    return (
+                      <React.Fragment key={echo.id}>
+                        <div style={{
+                          position: 'absolute', left: `${cx}%`, top: `${cy}%`,
+                          width: `${radius}%`, height: '2px', backgroundColor: 'var(--radar-color)',
+                          transformOrigin: '0% 50%', transform: `rotate(${angle}rad)`, opacity: 0.3, zIndex: 10,
+                          pointerEvents: 'none'
+                        }} />
+                        <EchoNode echo={expandedEcho} onClick={handleEchoClick} />
+                      </React.Fragment>
+                    );
+                  });
+                }
+                
+                return (
+                  <ClusterNode 
+                    key={`cluster-${clusterIndex}`}
+                    count={cluster.length} 
+                    x={cluster[0].x} 
+                    y={cluster[0].y} 
+                    onClick={() => setExpandedClusterId(clusterIndex)} 
+                  />
+                );
+              })}
+            </RadarBackground>
           </div>
         </>
       )}
