@@ -19,7 +19,7 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'orbitapp.png',
+            src: 'orbit.png',
             sizes: '192x192 512x512 1024x1024 any',
             type: 'image/png',
             purpose: 'any maskable'
