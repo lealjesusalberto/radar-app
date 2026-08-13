@@ -1,8 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { db, storage } from '../firebase';
+import { auth, db, storage } from '../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { signOut } from 'firebase/auth';
 
 const SettingsIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -101,11 +102,24 @@ const ProfileView = () => {
     const files = Array.from(e.target.files);
     if (!files.length || !currentUser) return;
     
+    const currentGalleryCount = user.gallery ? user.gallery.length : 0;
+    if (currentGalleryCount >= 3) {
+      alert("Solo puedes tener un máximo de 3 fotos en tu galería.");
+      return;
+    }
+
+    const availableSlots = 3 - currentGalleryCount;
+    const filesToUpload = files.slice(0, availableSlots);
+
+    if (files.length > availableSlots) {
+       alert(`Solo se subirán las primeras ${availableSlots} fotos para no exceder el límite de 3.`);
+    }
+
     setUploadingGallery(true);
     const newGalleryUrls = [];
     
     try {
-      for (const file of files) {
+      for (const file of filesToUpload) {
         const storageRef = ref(storage, `users/${currentUser.uid}/gallery_${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
@@ -276,7 +290,7 @@ const ProfileView = () => {
         <div style={styles.section}>
           <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
             <h3 style={{...styles.sectionTitle, marginBottom: 0}}>Galería</h3>
-            {isEditing && (
+            {isEditing && (!user.gallery || user.gallery.length < 3) && (
               <>
                 <button onClick={() => galleryInputRef.current?.click()} style={{background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '50%', width: '30px', height: '30px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'}}><PlusIcon /></button>
                 <input type="file" ref={galleryInputRef} onChange={handleGalleryUpload} multiple accept="image/*" style={{display: 'none'}} />
@@ -293,10 +307,43 @@ const ProfileView = () => {
           </div>
         </div>
 
+        </div>
+
+        {/* Botón de Logout */}
+        <div style={styles.section}>
+          <button 
+            onClick={() => signOut(auth)}
+            style={{
+              width: '100%',
+              padding: '16px',
+              backgroundColor: 'rgba(255, 59, 48, 0.1)',
+              color: '#ff3b30',
+              border: '1px solid rgba(255, 59, 48, 0.3)',
+              borderRadius: '16px',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 59, 48, 0.2)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 59, 48, 0.1)'}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Cerrar Sesión
+          </button>
+        </div>
+
         {/* Espaciador inferior para que no lo tape el menú */}
         <div style={{ height: '80px' }}></div>
       </div>
-    </div>
   );
 };
 

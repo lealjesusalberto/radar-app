@@ -68,7 +68,7 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
               <h3 style={styles.userName}>{echo.user.name}, {echo.user.age}</h3>
               {echo.user.isPro && <span style={styles.proBadge}>PRO</span>}
             </div>
-            <span style={styles.distance}>A {echo.distance}m de ti</span>
+            <span style={styles.distance}>A {parseFloat((echo.distance / 1000).toFixed(2))} km de ti</span>
           </div>
           
           <button 

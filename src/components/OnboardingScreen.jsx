@@ -9,7 +9,7 @@ const OnboardingScreen = ({ onEnter }) => {
       
       <div style={styles.content}>
         <div style={styles.logoContainer}>
-          <h1 style={styles.logoText}>ORBIT</h1>
+          <img src="/orbitapp.png" alt="Orbit Logo" style={styles.logoImage} />
           <p style={styles.tagline}>Encuentra tu sintonía</p>
         </div>
 
@@ -72,6 +72,12 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     marginTop: '20px',
+  },
+  logoImage: {
+    width: '160px',
+    height: 'auto',
+    marginBottom: '16px',
+    filter: 'drop-shadow(0 4px 20px rgba(0, 0, 0, 0.8))',
   },
   logoText: {
     fontSize: '48px',

@@ -50,7 +50,7 @@ const EchoNode = ({ echo, onClick }) => {
         <img src={echo.user.photo} alt={echo.user.name} style={avatarImageStyle} />
       </div>
       <div style={distanceBadgeStyle}>
-        {echo.distance}m
+        {parseFloat((echo.distance / 1000).toFixed(2))} km
       </div>
     </div>
   );

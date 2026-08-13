@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { DEFAULT_USER_AVATAR } from '../utils/constants';
 
@@ -11,6 +11,7 @@ const AuthView = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +19,9 @@ const AuthView = ({ onLogin }) => {
     setLoading(true);
 
     try {
+      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistenceType);
+
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
@@ -100,18 +104,7 @@ const AuthView = ({ onLogin }) => {
         WebkitBackdropFilter: 'blur(20px)',
       }}>
         <div style={{ textAlign: 'center' }}>
-          <h1 style={{ 
-            margin: 0, 
-            fontSize: '36px', 
-            fontWeight: '900', 
-            letterSpacing: '3px',
-            background: 'linear-gradient(to right, #ffffff, #00ffcc)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0 2px 10px rgba(0, 255, 204, 0.2)'
-          }}>
-            ORBIT
-          </h1>
+          <img src="/orbitapp.png" alt="Orbit Logo" style={{ width: '120px', height: 'auto', marginBottom: '8px', filter: 'drop-shadow(0 2px 10px rgba(0, 255, 204, 0.2))' }} />
           <p style={{ color: 'var(--text-muted)', marginTop: '12px', fontSize: '15px', fontWeight: '500' }}>
             {isLogin ? 'Bienvenido de nuevo a la red' : 'Comienza a conectar hoy'}
           </p>
@@ -254,6 +247,17 @@ const AuthView = ({ onLogin }) => {
                 <label htmlFor="password-input" className="premium-label">Contraseña</label>
               </div>
             </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '14px', alignSelf: 'flex-start', marginTop: '-8px' }}>
+            <input 
+              type="checkbox" 
+              id="rememberMe" 
+              checked={rememberMe} 
+              onChange={(e) => setRememberMe(e.target.checked)} 
+              style={{ cursor: 'pointer', accentColor: 'var(--radar-color)', width: '16px', height: '16px' }}
+            />
+            <label htmlFor="rememberMe" style={{ cursor: 'pointer', userSelect: 'none' }}>Recordar sesión</label>
           </div>
 
           <button type="submit" className="premium-button" style={{ marginTop: '8px' }} disabled={loading}>
