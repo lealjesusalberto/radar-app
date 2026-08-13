@@ -231,6 +231,8 @@ function App() {
               wheel={{ wheelDisabled: false }}
               pinch={{ disabled: false }}
               onTransformed={(ref) => setZoomScale(ref.state.scale)}
+              onZoom={(ref) => setZoomScale(ref.state.scale)}
+              onInit={(ref) => setZoomScale(ref.state.scale)}
             >
               <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
                 <RadarBackground>
