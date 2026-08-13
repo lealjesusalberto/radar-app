@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { auth, db, storage } from '../firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
 
@@ -162,6 +162,22 @@ const ProfileView = () => {
       await updateDoc(doc(db, 'users', currentUser.uid), {
         photo: downloadURL
       });
+      
+      // Update all chats to reflect the new profile photo
+      const q = query(
+        collection(db, 'chats'),
+        where('participants', 'array-contains', currentUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const batch = writeBatch(db);
+      
+      querySnapshot.forEach((chatDoc) => {
+        batch.update(chatDoc.ref, {
+          [`participantDetails.${currentUser.uid}.photo`]: downloadURL
+        });
+      });
+      
+      await batch.commit();
       
     } catch (error) {
       console.error("Error uploading photo:", error);
