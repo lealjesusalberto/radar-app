@@ -22,7 +22,13 @@ export default defineConfig({
             src: 'orbit.png',
             sizes: '192x192 512x512 1024x1024 any',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: 'orbitapp.png',
+            sizes: '192x192 512x512 1024x1024',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }
