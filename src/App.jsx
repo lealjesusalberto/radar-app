@@ -46,6 +46,7 @@ function App() {
   const [echoes, setEchoes] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -229,16 +230,15 @@ function App() {
               maxScale={5}
               wheel={{ wheelDisabled: false }}
               pinch={{ disabled: false }}
+              onTransformed={(ref) => setZoomScale(ref.state.scale)}
             >
-              {({ state }) => (
-                <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-                  <RadarBackground>
-                    {echoes.map(echo => (
-                      <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} zoomScale={state.scale} />
-                    ))}
-                  </RadarBackground>
-                </TransformComponent>
-              )}
+              <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
+                <RadarBackground>
+                  {echoes.map(echo => (
+                    <EchoNode key={echo.id} echo={echo} onClick={handleEchoClick} zoomScale={zoomScale} />
+                  ))}
+                </RadarBackground>
+              </TransformComponent>
             </TransformWrapper>
           </div>
         </>
