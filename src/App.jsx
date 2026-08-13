@@ -205,16 +205,16 @@ function App() {
       {/* Vistas según el Tab Activo */}
       {activeTab === 'radar' && (
         <>
-          <div style={{ position: 'absolute', top: 80, right: 20, zIndex: 10 }}>
+          <div style={{ position: 'absolute', top: 80, right: 20, zIndex: 100 }}>
             <button 
               onClick={() => {
                 if(isRefreshing) return;
                 setIsRefreshing(true);
                 setTimeout(() => setIsRefreshing(false), 1500);
               }}
-              style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', backdropFilter: 'blur(5px)', color: 'var(--text-muted)' }}
+              style={{ background: 'var(--radar-color)', border: 'none', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', boxShadow: '0 4px 15px rgba(0, 255, 204, 0.4)', color: '#0f172a' }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }}>
                 <polyline points="23 4 23 10 17 10"></polyline>
                 <polyline points="1 20 1 14 7 14"></polyline>
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
