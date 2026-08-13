@@ -7,7 +7,7 @@ const EchoNode = ({ echo, onClick }) => {
     position: 'absolute',
     left: `${echo.x}%`,
     top: `${echo.y}%`,
-    transform: `translate(-50%, -50%) scale(calc(1 / var(--zoom-scale, 1)))`,
+    transform: `translate(-50%, -50%) scale(var(--inv-zoom-scale, 1))`,
     cursor: 'pointer',
     animation: 'float 3s ease-in-out infinite',
     zIndex: 25,

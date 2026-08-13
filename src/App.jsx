@@ -230,9 +230,9 @@ function App() {
               maxScale={5}
               wheel={{ wheelDisabled: false }}
               pinch={{ disabled: false }}
-              onTransformed={(ref) => document.documentElement.style.setProperty('--zoom-scale', ref.state.scale)}
-              onZoom={(ref) => document.documentElement.style.setProperty('--zoom-scale', ref.state.scale)}
-              onInit={(ref) => document.documentElement.style.setProperty('--zoom-scale', ref.state.scale)}
+              onTransformed={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
+              onZoom={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
+              onInit={(ref) => document.documentElement.style.setProperty('--inv-zoom-scale', 1 / ref.state.scale)}
             >
               <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
                 <RadarBackground>
