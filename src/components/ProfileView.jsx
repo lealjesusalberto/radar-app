@@ -4,6 +4,7 @@ import { auth, db, storage } from '../firebase';
 import { doc, updateDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { signOut } from 'firebase/auth';
+import { PREDEFINED_INTERESTS } from '../utils/constants';
 
 const SettingsIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -50,6 +51,7 @@ const ProfileView = () => {
   
   const [editBio, setEditBio] = useState('');
   const [editJob, setEditJob] = useState('');
+  const [editAge, setEditAge] = useState('');
   const [newInterest, setNewInterest] = useState('');
 
   // Usa datos reales, o el mock si userData no ha cargado completamente aún para evitar errores
@@ -70,7 +72,8 @@ const ProfileView = () => {
       try {
         await updateDoc(doc(db, 'users', currentUser.uid), {
           bio: editBio,
-          job: editJob
+          job: editJob,
+          age: editAge
         });
       } catch (e) {
         console.error("Error updating profile", e);
@@ -80,23 +83,26 @@ const ProfileView = () => {
       // Load current values
       setEditBio(user.bio || '');
       setEditJob(user.job || '');
+      setEditAge(user.age || '');
     }
     setIsEditing(!isEditing);
   };
 
-  const handleAddInterest = async (e) => {
-    if (e.key === 'Enter' && newInterest.trim()) {
-      const updatedInterests = [...(user.interests || []), newInterest.trim()];
+  const handleSelectInterest = async (e) => {
+    const selected = e.target.value;
+    if (selected && !(user.interests || []).includes(selected)) {
+      const updatedInterests = [...(user.interests || []), selected];
       try {
         await updateDoc(doc(db, 'users', currentUser.uid), {
           interests: updatedInterests
         });
-        setNewInterest('');
       } catch (error) {
         console.error("Error adding interest", error);
       }
     }
+    setNewInterest('');
   };
+
 
   const handleGalleryUpload = async (e) => {
     const files = Array.from(e.target.files);
@@ -229,7 +235,20 @@ const ProfileView = () => {
             </button>
           </div>
           <div style={styles.headerBottom}>
-            <h1 style={styles.name}>{user.name} {user.age ? `, ${user.age}` : ''}</h1>
+            {isEditing ? (
+              <div style={{display: 'flex', alignItems: 'baseline', gap: '8px'}}>
+                <h1 style={styles.name}>{user.name}</h1>
+                <input 
+                  type="number" 
+                  value={editAge} 
+                  onChange={e => setEditAge(e.target.value)} 
+                  placeholder="Edad" 
+                  style={{background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '4px 8px', borderRadius: '4px', width: '70px', fontSize: '16px'}} 
+                />
+              </div>
+            ) : (
+              <h1 style={styles.name}>{user.name} {user.age ? `, ${user.age}` : ''}</h1>
+            )}
             {isEditing ? (
               <input 
                 type="text" 
@@ -291,14 +310,19 @@ const ProfileView = () => {
             )) : <p style={styles.bioText}>No has añadido intereses aún.</p>}
           </div>
           {isEditing && (
-            <input 
-              type="text" 
+            <select 
               value={newInterest} 
-              onChange={e => setNewInterest(e.target.value)} 
-              onKeyDown={handleAddInterest}
-              placeholder="Escribe un interés y presiona Enter..." 
+              onChange={handleSelectInterest} 
               style={{marginTop: '12px', width: '100%', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '8px', outline: 'none'}}
-            />
+            >
+              <option value="" disabled style={{color: 'black'}}>Selecciona un interés para agregar...</option>
+              {PREDEFINED_INTERESTS.map((interest, idx) => {
+                if (!(user.interests || []).includes(interest)) {
+                  return <option key={idx} value={interest} style={{color: 'black'}}>{interest}</option>;
+                }
+                return null;
+              })}
+            </select>
           )}
         </div>
 

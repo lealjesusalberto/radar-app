@@ -98,6 +98,7 @@ function App() {
           message: data.bio ? data.bio.substring(0, 40) + '...' : '¡Hola, estoy en Orbit!',
           distance: Math.round(distance),
           x, y,
+          hasMatchingInterest: userData?.interests?.some(i => data.interests?.includes(i)) || false,
           user: {
             id: doc.id,
             name: data.name,

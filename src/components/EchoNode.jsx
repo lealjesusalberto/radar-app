@@ -16,14 +16,17 @@ const EchoNode = ({ echo, onClick }) => {
     gap: '4px',
   };
 
+  const borderColor = echo.hasMatchingInterest ? 'var(--lilac-color)' : 'var(--radar-color)';
+  const glowColor = echo.hasMatchingInterest ? 'var(--lilac-color-glow)' : 'var(--radar-color-glow)';
+
   const avatarContainerStyle = {
     width: '45px',
     height: '45px',
     borderRadius: '50%',
-    animation: 'pulseGlow 2s infinite',
-    border: '2px solid var(--radar-color)',
+    animation: echo.hasMatchingInterest ? 'pulseGlowLilac 2s infinite' : 'pulseGlow 2s infinite',
+    border: `2px solid ${borderColor}`,
     overflow: 'hidden',
-    boxShadow: '0 0 10px var(--radar-color-glow)',
+    boxShadow: `0 0 10px ${glowColor}`,
   };
 
   const avatarImageStyle = {
@@ -34,11 +37,11 @@ const EchoNode = ({ echo, onClick }) => {
 
   const distanceBadgeStyle = {
     backgroundColor: 'rgba(10, 25, 47, 0.9)',
-    color: 'var(--radar-color)',
+    color: borderColor,
     fontSize: '10px',
     padding: '2px 6px',
     borderRadius: '8px',
-    border: '1px solid var(--radar-color-dim)',
+    border: `1px solid ${echo.hasMatchingInterest ? 'rgba(200, 162, 200, 0.3)' : 'var(--radar-color-dim)'}`,
     fontWeight: 'bold',
     whiteSpace: 'nowrap',
     pointerEvents: 'none', // Para no interferir con el click en el avatar
