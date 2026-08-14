@@ -185,3 +185,59 @@ body {
 }
 
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Grid View (Alternativa Grindr) */
+.radar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 100px 20px 80px 20px;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.profile-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.profile-cell:hover {
+  border-color: var(--radar-color);
+  transform: scale(1.02);
+}
+
+.profile-cell.matching-interest {
+  border-color: var(--lilac-color);
+  box-shadow: 0 0 10px var(--lilac-color-glow);
+}
+
+.profile-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-cell .distance-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(10, 25, 47, 0.9);
+  color: var(--radar-color);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.profile-cell.matching-interest .distance-badge {
+  color: var(--lilac-color);
+  border: 1px solid rgba(200, 162, 200, 0.3);
+}
+

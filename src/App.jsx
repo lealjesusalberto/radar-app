@@ -12,6 +12,7 @@ import ChatModal from './components/ChatModal';
 import ChatsView from './components/ChatsView';
 import NotificationsModal from './components/NotificationsModal';
 import ReloadPrompt from './components/ReloadPrompt';
+import MainGrid from './components/MainGrid';
 import { useAuth } from './context/AuthContext';
 import { db } from './firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
@@ -40,6 +41,7 @@ function App() {
     return localStorage.getItem('orbit_onboarding_done') !== 'true';
   });
   const [activeTab, setActiveTab] = useState('radar');
+  const [viewMode, setViewMode] = useState('radar'); // 'radar' or 'grid'
   const [selectedEcho, setSelectedEcho] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [publicProfileUser, setPublicProfileUser] = useState(null);
@@ -230,6 +232,22 @@ function App() {
       {/* Vistas según el Tab Activo */}
       {activeTab === 'radar' && (
         <>
+          {/* Toggle Radar / Grid */}
+          <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', background: 'rgba(0,0,0,0.5)', borderRadius: '20px', padding: '4px', border: '1px solid var(--glass-border)', backdropFilter: 'blur(5px)' }}>
+            <button 
+              onClick={() => setViewMode('radar')}
+              style={{ background: viewMode === 'radar' ? 'var(--radar-color)' : 'transparent', color: viewMode === 'radar' ? '#0f172a' : 'white', border: 'none', borderRadius: '16px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              Radar
+            </button>
+            <button 
+              onClick={() => setViewMode('grid')}
+              style={{ background: viewMode === 'grid' ? 'var(--radar-color)' : 'transparent', color: viewMode === 'grid' ? '#0f172a' : 'white', border: 'none', borderRadius: '16px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              Grid
+            </button>
+          </div>
+
           <div style={{ position: 'absolute', top: 80, right: 20, zIndex: 100 }}>
             <button 
               onClick={() => {
@@ -246,9 +264,11 @@ function App() {
               </svg>
             </button>
           </div>
+          
           <div style={{ width: '100%', height: '100%', opacity: isRefreshing ? 0.5 : 1, transition: 'opacity 0.3s' }} onClick={() => setExpandedClusterId(null)}>
-            <RadarBackground>
-              {clusters.map((cluster, clusterIndex) => {
+            {viewMode === 'radar' ? (
+              <RadarBackground>
+                {clusters.map((cluster, clusterIndex) => {
                 if (cluster.length === 1) {
                   return <EchoNode key={cluster[0].id} echo={cluster[0]} onClick={handleEchoClick} />;
                 }
@@ -288,9 +308,15 @@ function App() {
                     y={cluster[0].y} 
                     onClick={() => setExpandedClusterId(clusterIndex)} 
                   />
-                );
-              })}
-            </RadarBackground>
+                  );
+                })}
+              </RadarBackground>
+            ) : (
+              <MainGrid 
+                users={echoes} 
+                onSelectUser={handleEchoClick} 
+              />
+            )}
           </div>
         </>
       )}
