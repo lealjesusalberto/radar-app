@@ -42,6 +42,7 @@ function App() {
   });
   const [activeTab, setActiveTab] = useState('radar');
   const [viewMode, setViewMode] = useState('radar'); // 'radar' or 'grid'
+  const [maxDistance, setMaxDistance] = useState(10000); // 10km max distance by default
   const [selectedEcho, setSelectedEcho] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [publicProfileUser, setPublicProfileUser] = useState(null);
@@ -55,7 +56,7 @@ function App() {
     if (!currentUser) return;
 
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
-      const MAX_DISTANCE = 5000; // 5km
+      const MAX_DISTANCE = maxDistance;
       const realEchoes = [];
 
       snapshot.forEach(doc => {
@@ -71,6 +72,8 @@ function App() {
             data.location.lat, data.location.lng
           );
         }
+
+        if (distance > MAX_DISTANCE) return; // Filtramos por distancia máxima
 
         // Generate radar position based on distance
         // Map distance to a radius between 10 and 45
@@ -116,11 +119,11 @@ function App() {
         });
       });
 
-      setEchoes(realEchoes);
+      setEchoes(realEchoes.sort((a, b) => a.distance - b.distance));
     });
 
     return () => unsubscribe();
-  }, [currentUser, userData]);
+  }, [currentUser, userData, maxDistance]);
 
   const handleEchoClick = (echo) => setSelectedEcho(echo);
   const closeEchoDetail = () => setSelectedEcho(null);
@@ -232,20 +235,38 @@ function App() {
       {/* Vistas según el Tab Activo */}
       {activeTab === 'radar' && (
         <>
-          {/* Toggle Radar / Grid */}
-          <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', background: 'rgba(0,0,0,0.5)', borderRadius: '20px', padding: '4px', border: '1px solid var(--glass-border)', backdropFilter: 'blur(5px)' }}>
-            <button 
-              onClick={() => setViewMode('radar')}
-              style={{ background: viewMode === 'radar' ? 'var(--radar-color)' : 'transparent', color: viewMode === 'radar' ? '#0f172a' : 'white', border: 'none', borderRadius: '16px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              Radar
-            </button>
-            <button 
-              onClick={() => setViewMode('grid')}
-              style={{ background: viewMode === 'grid' ? 'var(--radar-color)' : 'transparent', color: viewMode === 'grid' ? '#0f172a' : 'white', border: 'none', borderRadius: '16px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              Grid
-            </button>
+          {/* Toggle Radar / Grid and Filter */}
+          <div style={{ position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', borderRadius: '20px', padding: '4px', border: '1px solid var(--glass-border)', backdropFilter: 'blur(5px)' }}>
+              <button 
+                onClick={() => setViewMode('radar')}
+                style={{ background: viewMode === 'radar' ? 'var(--radar-color)' : 'transparent', color: viewMode === 'radar' ? '#0f172a' : 'white', border: 'none', borderRadius: '16px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                Radar
+              </button>
+              <button 
+                onClick={() => setViewMode('grid')}
+                style={{ background: viewMode === 'grid' ? 'var(--radar-color)' : 'transparent', color: viewMode === 'grid' ? '#0f172a' : 'white', border: 'none', borderRadius: '16px', padding: '6px 12px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}
+              >
+                Grid
+              </button>
+            </div>
+            
+            {/* Distancia máxima */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.5)', padding: '4px 12px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)'}}>
+              <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Radio:</span>
+              <select 
+                value={maxDistance} 
+                onChange={(e) => setMaxDistance(Number(e.target.value))}
+                style={{ background: 'transparent', color: 'white', border: 'none', fontSize: '12px', outline: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                <option value={1000} style={{color: 'black'}}>1 km</option>
+                <option value={5000} style={{color: 'black'}}>5 km</option>
+                <option value={10000} style={{color: 'black'}}>10 km</option>
+                <option value={50000} style={{color: 'black'}}>50 km</option>
+                <option value={100000} style={{color: 'black'}}>100 km</option>
+              </select>
+            </div>
           </div>
 
           <div style={{ position: 'absolute', top: 80, right: 20, zIndex: 100 }}>
