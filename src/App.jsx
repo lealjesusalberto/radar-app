@@ -42,7 +42,7 @@ function App() {
   });
   const [activeTab, setActiveTab] = useState('radar');
   const [viewMode, setViewMode] = useState('radar'); // 'radar' or 'grid'
-  const [maxDistance, setMaxDistance] = useState(10000); // 10km max distance by default
+  const [maxDistance, setMaxDistance] = useState(5000); // 5km max distance by default
   const [selectedEcho, setSelectedEcho] = useState(null);
   const [activeChat, setActiveChat] = useState(null);
   const [publicProfileUser, setPublicProfileUser] = useState(null);

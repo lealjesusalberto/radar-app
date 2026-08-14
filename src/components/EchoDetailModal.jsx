@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { DEFAULT_USER_AVATAR } from '../utils/constants';
 
@@ -19,28 +19,60 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
   if (!echo) return null;
 
   const handleLike = async () => {
-    setLiked(!liked);
-    if (onLike) onLike(echo, !liked);
+    if (!currentUser || !echo?.user?.id) return;
+    
+    if (liked) {
+      setLiked(false);
+      return;
+    }
 
-    // Only notify when liking (not unliking), and if there's a currentUser
-    if (!liked && currentUser && echo.user.id) {
+    try {
+      // Verificar si ya le dio like en las últimas 24 horas
+      const q = query(
+        collection(db, 'notifications'),
+        where('senderId', '==', currentUser.uid),
+        where('recipientId', '==', echo.user.id),
+        where('type', '==', 'like')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      let alreadyLikedToday = false;
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      
+      querySnapshot.forEach((docSnap) => {
+        const notif = docSnap.data();
+        if (notif.timestamp) {
+           // Firestore timestamp to JS Date
+           const notifDate = notif.timestamp.toDate ? notif.timestamp.toDate() : new Date(notif.timestamp);
+           if (notifDate > oneDayAgo) {
+             alreadyLikedToday = true;
+           }
+        }
+      });
+      
+      if (alreadyLikedToday) {
+        alert("Solo puedes darle like a una misma persona una vez por día.");
+        return;
+      }
+
+      setLiked(true);
+      if (onLike) onLike(echo, true);
+
       const myPhoto = userData?.photo && !userData.photo.includes('pravatar')
         ? userData.photo
         : DEFAULT_USER_AVATAR;
 
-      try {
-        await addDoc(collection(db, 'notifications'), {
-          recipientId: echo.user.id,
-          senderId: currentUser.uid,
-          senderName: userData?.name || 'Alguien',
-          senderPhoto: myPhoto,
-          type: 'like',
-          read: false,
-          timestamp: serverTimestamp()
-        });
-      } catch (err) {
-        console.error("Error al enviar notificación de like", err);
-      }
+      await addDoc(collection(db, 'notifications'), {
+        recipientId: echo.user.id,
+        senderId: currentUser.uid,
+        senderName: userData?.name || 'Alguien',
+        senderPhoto: myPhoto,
+        type: 'like',
+        read: false,
+        timestamp: serverTimestamp()
+      });
+    } catch (err) {
+      console.error("Error al dar like", err);
     }
   };
 
