@@ -7,6 +7,7 @@ import { DEFAULT_USER_AVATAR } from '../utils/constants';
 const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
   const [showFullProfile, setShowFullProfile] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [showLikeLimitModal, setShowLikeLimitModal] = useState(false);
   const { currentUser, userData } = useAuth();
 
   useEffect(() => {
@@ -51,7 +52,7 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
       });
       
       if (alreadyLikedToday) {
-        alert("Solo puedes darle like a una misma persona una vez por día.");
+        setShowLikeLimitModal(true);
         return;
       }
 
@@ -149,6 +150,24 @@ const EchoDetailModal = ({ echo, onClose, onLike, onChat, onViewProfile }) => {
           </>
         )}
       </div>
+
+      {showLikeLimitModal && (
+        <div style={{...styles.overlay, zIndex: 200}} onClick={() => setShowLikeLimitModal(false)}>
+          <div className="glass-panel" style={{...styles.modal, width: '280px', textAlign: 'center', padding: '32px 24px'}} onClick={(e) => e.stopPropagation()}>
+            <div style={{fontSize: '48px', marginBottom: '16px'}}>⏳</div>
+            <h3 style={{color: 'white', margin: '0 0 12px 0'}}>Límite Alcanzado</h3>
+            <p style={{color: 'var(--text-muted)', fontSize: '14px', margin: '0 0 24px 0', lineHeight: '1.5'}}>
+              Solo puedes darle like a una misma persona una vez por día. Vuelve a intentarlo mañana.
+            </p>
+            <button 
+              style={{...styles.replyButton, width: '100%', flex: 'none'}} 
+              onClick={() => setShowLikeLimitModal(false)}
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
