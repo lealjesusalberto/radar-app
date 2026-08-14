@@ -191,6 +191,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
+  align-content: start;
   padding: 110px 10px 80px 10px;
   width: 100%;
   height: 100%;
